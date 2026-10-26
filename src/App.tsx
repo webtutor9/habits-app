@@ -8,15 +8,15 @@ import { Settings, SyncSettings } from './views/Settings'
 
 type Tab = 'today' | 'grid' | 'stats' | 'settings'
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'today', label: 'Heute', icon: '✓' },
   { id: 'grid', label: 'Jahr', icon: '▦' },
+  { id: 'today', label: 'Heute', icon: '✓' },
   { id: 'stats', label: 'Auswertung', icon: '↗' },
   { id: 'settings', label: 'Einstellungen', icon: '⚙' },
 ]
 
 export default function App() {
   const { data, sync } = useStore()
-  const [tab, setTab] = useState<Tab>(() => (location.hash.slice(1) as Tab) || 'today')
+  const [tab, setTab] = useState<Tab>(() => (location.hash.slice(1) as Tab) || 'grid')
   useEffect(() => {
     history.replaceState(null, '', `#${tab}`)
   }, [tab])

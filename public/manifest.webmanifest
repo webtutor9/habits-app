@@ -1,7 +1,7 @@
 {
   "name": "HabitsApp",
   "short_name": "Habits",
-  "start_url": "./",
+  "start_url": "./#grid",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6f5f1",

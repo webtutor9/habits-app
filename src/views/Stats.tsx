@@ -161,7 +161,7 @@ function LineChart({ pts, from, to, unit }: { pts: { date: string; value: number
         ))}
         <path d={path(pts)} className="line-raw" />
         <path d={path(avg)} className="line-avg" />
-        {pts.length <= 60 && pts.map((p) => <circle key={p.date} cx={x(p.date)} cy={y(p.value)} r={2.5} className="dot" />)}
+        {pts.length <= 60 && pts.map((p) => <circle key={p.date} cx={x(p.date)} cy={y(p.value)} r={2.5} className="chart-dot" />)}
       </svg>
       <div className="chart-legend muted small">
         <span><i className="lg raw" /> Messwert</span>
