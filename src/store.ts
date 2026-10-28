@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { CellValue, Habit, HabitsData, Op, SyncConfig } from './types'
 import { loadRemote, saveRemote, ConflictError } from './github'
+import { addDays, todayIso } from './dates'
 
 const K_DATA = 'habits.data'
 const K_PENDING = 'habits.pending'
@@ -116,6 +117,8 @@ function allCellOps(data: HabitsData): Op[] {
   return ops
 }
 
+export const getConfig = () => state.config
+
 export function setConfig(config: SyncConfig | null) {
   set({ config, sync: config ? { state: 'pending' } : { state: 'off' }, pending: config ? state.pending : [] })
   if (config) syncNow()
@@ -152,6 +155,7 @@ export async function syncNow(): Promise<void> {
       }
       if (!ops.length && remote) {
         set({ data: remote.data, sync: { state: 'idle', at: new Date().toISOString() } })
+        prefillAfterSync = true
         return
       }
       const merged = applyOps(base, ops)
@@ -165,6 +169,7 @@ export async function syncNow(): Promise<void> {
       const rest = state.pending.slice(ops.length)
       set({ data: applyOps(merged, rest), pending: rest, sync: rest.length ? { state: 'pending' } : { state: 'idle', at: new Date().toISOString() } })
       if (rest.length) scheduleSync(300)
+      prefillAfterSync = true
       return
     }
     throw new Error('Konflikt beim Speichern – bitte erneut versuchen')
@@ -172,7 +177,40 @@ export async function syncNow(): Promise<void> {
     set({ sync: { state: 'error', message: e instanceof Error ? e.message : String(e) } })
   } finally {
     running = false
+    if (prefillAfterSync) {
+      prefillAfterSync = false
+      autoPrefill()
+    }
   }
+}
+let prefillAfterSync = false
+
+/** Sections whose habits get pre-planned (yellow) automatically. */
+export const AUTO_PLAN_SECTIONS = ['Morgen', 'Abend']
+/** Marker per day so each day is pre-filled only once; a mark removed by hand stays removed. */
+export const PREFILL_KEY = '__prefilled'
+
+/** Pre-fill today and tomorrow: empty status cells in Morgen/Abend become 'planned'. */
+export function autoPrefill() {
+  const data = state.data
+  if (!data) return
+  const today = todayIso()
+  const habits = data.habits.filter((h) => h.type === 'status' && !h.archived && AUTO_PLAN_SECTIONS.includes(h.section))
+  if (!habits.length) return
+  const ops: Op[] = []
+  for (const date of [today, addDays(today, 1)]) {
+    const day = data.entries[date] ?? {}
+    if (day[PREFILL_KEY] !== undefined) continue
+    for (const h of habits) if (day[h.id] === undefined) ops.push({ kind: 'cell', date, habit: h.id, value: 'planned' })
+    ops.push({ kind: 'cell', date, habit: PREFILL_KEY, value: 1 })
+  }
+  if (!ops.length) return
+  set({
+    data: applyOps(data, ops),
+    pending: state.config ? [...state.pending, ...ops] : [],
+    sync: state.config ? { state: 'pending' } : state.sync,
+  })
+  scheduleSync(300)
 }
 
 export function emptyData(habits: Habit[] = []): HabitsData {
@@ -183,6 +221,8 @@ export function emptyData(habits: Habit[] = []): HabitsData {
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => syncNow())
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') syncNow()
+    if (document.visibilityState !== 'visible') return
+    if (state.config) syncNow()
+    else autoPrefill()
   })
 }

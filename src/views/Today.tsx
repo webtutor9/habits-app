@@ -1,3 +1,4 @@
+import { fmtDelta, fmtHabit } from '../format'
 import { useState } from 'react'
 import type { HabitsData } from '../types'
 import { addDays, formatLong, todayIso } from '../dates'
@@ -49,7 +50,7 @@ export function Today({ data }: { data: HabitsData }) {
                 <div key={h.id} className="row static">
                   <span className="row-name">{h.name}</span>
                   <span className={`delta ${d === null ? '' : d > 0 ? 'up' : d < 0 ? 'down' : ''}`}>
-                    {d === null ? '–' : `${d > 0 ? '+' : ''}${d.toFixed(1)} ${h.unit ?? ''}`}
+                    {d === null ? '–' : `${fmtDelta(d)} ${h.unit ?? ''}`}
                   </span>
                 </div>
               )
@@ -61,7 +62,7 @@ export function Today({ data }: { data: HabitsData }) {
                   <span className="row-value">
                     {typeof v === 'number' ? (
                       <>
-                        {v} <span className="muted">{h.unit}</span>
+                        {fmtHabit(v, h)} <span className="muted">{h.unit}</span>
                       </>
                     ) : (
                       <span className="muted">eintragen</span>

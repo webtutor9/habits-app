@@ -1,3 +1,4 @@
+import { fmtHabit } from './format'
 import { useEffect, useState } from 'react'
 import type { CellValue, Habit, Status } from './types'
 import { STATUS_ORDER, statusLabel } from './status'
@@ -31,7 +32,7 @@ export interface PickTarget {
 export function CellSheet({ target, onClose }: { target: PickTarget | null; onClose: () => void }) {
   const [num, setNum] = useState('')
   useEffect(() => {
-    if (target) setNum(typeof target.value === 'number' ? String(target.value) : '')
+    if (target) setNum(typeof target.value === 'number' ? fmtHabit(target.value, target.habit) : '')
   }, [target])
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose()

@@ -1,3 +1,4 @@
+import { fmt, fmtDelta } from '../format'
 import { useMemo, useState } from 'react'
 import type { HabitsData } from '../types'
 import { MONTHS, addDays, parse, todayIso } from '../dates'
@@ -133,15 +134,15 @@ function LineChart({ pts, from, to, unit }: { pts: { date: string; value: number
     <div>
       <div className="kpis">
         <div>
-          <div className="kpi">{last.toFixed(1)}</div>
+          <div className="kpi">{fmt(last, 1)}</div>
           <div className="muted small">aktuell {unit}</div>
         </div>
         <div>
-          <div className={`kpi ${change > 0 ? 'up' : change < 0 ? 'down' : ''}`}>{change > 0 ? '+' : ''}{change.toFixed(1)}</div>
+          <div className={`kpi ${change > 0 ? 'up' : change < 0 ? 'down' : ''}`}>{fmtDelta(change)}</div>
           <div className="muted small">Veränderung</div>
         </div>
         <div>
-          <div className="kpi">{Math.min(...vals).toFixed(1)}–{Math.max(...vals).toFixed(1)}</div>
+          <div className="kpi">{fmt(Math.min(...vals), 1)}–{fmt(Math.max(...vals), 1)}</div>
           <div className="muted small">Spanne</div>
         </div>
       </div>
@@ -150,7 +151,7 @@ function LineChart({ pts, from, to, unit }: { pts: { date: string; value: number
           <g key={t}>
             <line x1={L} x2={W - R} y1={y(t)} y2={y(t)} className="gridline" />
             <text x={L - 6} y={y(t) + 4} textAnchor="end" className="tick">
-              {t % 1 ? t.toFixed(1) : t}
+              {fmt(t)}
             </text>
           </g>
         ))}

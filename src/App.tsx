@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { emptyData, replaceData, syncNow, useStore } from './store'
+import { autoPrefill, emptyData, getConfig, replaceData, syncNow, useStore } from './store'
 import type { Habit, HabitsData } from './types'
 import { Today } from './views/Today'
 import { Grid } from './views/Grid'
@@ -21,7 +21,8 @@ export default function App() {
     history.replaceState(null, '', `#${tab}`)
   }, [tab])
   useEffect(() => {
-    syncNow()
+    if (getConfig()) syncNow()
+    else autoPrefill()
   }, [])
 
   return (

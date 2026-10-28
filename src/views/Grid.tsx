@@ -1,3 +1,4 @@
+import { fmtDelta, fmtHabit } from '../format'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { CellValue, Habit, HabitsData } from '../types'
 import { MONTHS, WEEKDAYS, addDays, daysOfYear, parse, todayIso } from '../dates'
@@ -162,7 +163,7 @@ const GridRow = memo(function GridRow({
           const v = delta(data, habit, d.iso)
           return (
             <td key={d.iso} className={`${cls} num ${v === null ? '' : v > 0 ? 'up' : v < 0 ? 'down' : ''}`}>
-              {v === null ? '' : v > 0 ? `+${v}` : v}
+              {v === null ? '' : fmtDelta(v)}
             </td>
           )
         }
@@ -170,7 +171,7 @@ const GridRow = memo(function GridRow({
         if (habit.type === 'number') {
           return (
             <td key={d.iso} className={`${cls} num`} onClick={() => onPick({ date: d.iso, habit, value: v })}>
-              {typeof v === 'number' ? v : ''}
+              {typeof v === 'number' ? fmtHabit(v, habit) : ''}
             </td>
           )
         }
